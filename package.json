@@ -1,0 +1,29 @@
+{
+  "name": "copilot-studio-chatbot",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 3000"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@azure/msal-browser": "^4.13.1",
+    "@microsoft/agents-copilotstudio-client": "^1.7.2",
+    "botframework-webchat": "^4.19.1",
+    "botframework-webchat-fluent-theme": "^4.19.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  }
+}
