@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Components } from 'botframework-webchat'
-import { FluentThemeProvider } from 'botframework-webchat-fluent-theme'
 import {
   CopilotStudioClient,
   CopilotStudioWebChat,
@@ -24,21 +23,22 @@ type ChatPageProps = {
 }
 
 const styleOptions = {
-  accent: '#7c6af7',
-  backgroundColor: 'transparent',
-  bubbleBackground: '#161b2e',
-  bubbleTextColor: '#eef1ff',
+  accent: '#5b5fc7',
+  backgroundColor: '#ffffff',
+  bubbleBackground: '#f3f5fa',
+  bubbleTextColor: '#1b1f2a',
   bubbleBorderRadius: 16,
-  bubbleFromUserBackground: '#7c6af7',
+  bubbleFromUserBackground: '#5b5fc7',
   bubbleFromUserTextColor: '#ffffff',
   bubbleFromUserBorderRadius: 16,
   hideUploadButton: true,
-  sendBoxBackground: '#121627',
-  sendBoxTextColor: '#eef1ff',
-  sendBoxButtonColor: '#b7a9ff',
-  sendBoxBorderTop: '1px solid rgba(255,255,255,0.08)',
-  suggestedActionBackgroundColor: '#1c2340',
-  suggestedActionTextColor: '#eef1ff',
+  sendBoxBackground: '#ffffff',
+  sendBoxTextColor: '#1b1f2a',
+  sendBoxButtonColor: '#5b5fc7',
+  sendBoxBorderTop: '1px solid #e6e9f2',
+  suggestedActionBackgroundColor: '#f3f5fa',
+  suggestedActionTextColor: '#1b1f2a',
+  transcriptBackgroundColor: '#ffffff',
 }
 
 export function ChatPage({
@@ -62,7 +62,11 @@ export function ChatPage({
 
     try {
       const client = new CopilotStudioClient(settings, token)
-      created = CopilotStudioWebChat.createConnection(client, { showTyping: true })
+      created = CopilotStudioWebChat.createConnection(client, {
+        showTyping: true,
+        // Skip the automatic greeting turn so the brand-page message starts the chat.
+        startConversation: !initialMessage.trim(),
+      })
       if (active) {
         setConnection(created)
       }
@@ -78,7 +82,7 @@ export function ChatPage({
         created.end()
       }
     }
-  }, [settings, token])
+  }, [initialMessage, settings, token])
 
   return (
     <div className="chat-app">
@@ -107,12 +111,10 @@ export function ChatPage({
 
       <div className="webchat">
         {connection ? (
-          <FluentThemeProvider>
-            <Composer directLine={connection} styleOptions={styleOptions}>
-              <InitialMessageSender text={initialMessage} connection={connection} />
-              <BasicWebChat />
-            </Composer>
-          </FluentThemeProvider>
+          <Composer directLine={connection} styleOptions={styleOptions}>
+            {initialMessage.trim() ? <InitialMessageSender text={initialMessage} /> : null}
+            <BasicWebChat />
+          </Composer>
         ) : (
           <div className="loading">Opening bot…</div>
         )}

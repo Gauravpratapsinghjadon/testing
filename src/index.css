@@ -1,10 +1,10 @@
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   font-family: "Segoe UI", "Sora", sans-serif;
   line-height: 1.45;
   font-weight: 400;
-  color: #eef1ff;
-  background: #070a16;
+  color: #1b1f2a;
+  background: #f5f7fb;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -24,13 +24,14 @@ body,
 
 body {
   background:
-    radial-gradient(circle at top left, rgba(124, 106, 247, 0.28), transparent 32%),
-    radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.16), transparent 26%),
-    #070a16;
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.1), transparent 30%),
+    radial-gradient(circle at 88% 8%, rgba(14, 165, 233, 0.08), transparent 24%),
+    #f5f7fb;
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -43,17 +44,16 @@ input {
 
 .card {
   width: min(520px, 100%);
-  background: rgba(14, 18, 36, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid #e6e9f2;
   border-radius: 28px;
   padding: 36px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 50px rgba(28, 39, 74, 0.08);
 }
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #a99bff;
+  color: #5b5fc7;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-size: 12px;
@@ -64,11 +64,12 @@ h1 {
   margin: 0 0 10px;
   font-size: 32px;
   letter-spacing: -0.04em;
+  color: #151826;
 }
 
 .lede,
 .hint {
-  color: #b7bedd;
+  color: #5d6478;
 }
 
 .lede {
@@ -84,28 +85,29 @@ label {
   display: grid;
   gap: 8px;
   font-size: 14px;
-  color: #cdd3ee;
+  color: #3d4356;
 }
 
 input {
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #10152a;
-  color: #eef1ff;
+  border: 1px solid #d9deea;
+  background: #ffffff;
+  color: #151826;
   border-radius: 14px;
   padding: 12px 14px;
   outline: none;
 }
 
 input:focus {
-  border-color: #7c6af7;
-  box-shadow: 0 0 0 3px rgba(124, 106, 247, 0.2);
+  border-color: #5b5fc7;
+  box-shadow: 0 0 0 3px rgba(91, 95, 199, 0.16);
 }
 
 .primary,
 .ms-login,
 .ghost,
-.link {
+.link,
+.arrow-button {
   cursor: pointer;
 }
 
@@ -119,7 +121,7 @@ input:focus {
 
 .primary {
   margin-top: 8px;
-  background: linear-gradient(180deg, #8b7cff, #6b5af0);
+  background: #5b5fc7;
   color: white;
   font-weight: 700;
 }
@@ -131,6 +133,7 @@ input:focus {
   gap: 10px;
   background: white;
   color: #1b1b1b;
+  border: 1px solid #d9deea;
   font-weight: 650;
 }
 
@@ -141,9 +144,9 @@ input:focus {
 }
 
 .ghost {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: transparent;
-  color: #eef1ff;
+  border: 1px solid #d9deea;
+  background: #ffffff;
+  color: #2b3142;
   border-radius: 999px;
   padding: 8px 14px;
 }
@@ -152,7 +155,7 @@ input:focus {
   margin-top: 18px;
   border: 0;
   background: none;
-  color: #b7a9ff;
+  color: #5b5fc7;
   padding: 0;
 }
 
@@ -163,9 +166,9 @@ input:focus {
 }
 
 .banner.error {
-  background: rgba(248, 113, 113, 0.12);
-  color: #fecaca;
-  border: 1px solid rgba(248, 113, 113, 0.28);
+  background: #fff2f2;
+  color: #9f1239;
+  border: 1px solid #fecdd3;
 }
 
 .hint {
@@ -177,6 +180,7 @@ input:focus {
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr;
+  background: #ffffff;
 }
 
 .chat-header {
@@ -185,8 +189,8 @@ input:focus {
   align-items: center;
   gap: 16px;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(8, 11, 24, 0.8);
+  border-bottom: 1px solid #e6e9f2;
+  background: #ffffff;
 }
 
 .chat-actions {
@@ -200,7 +204,7 @@ input:focus {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #cdd3ee;
+  color: #5d6478;
   font-size: 13px;
 }
 
@@ -212,19 +216,21 @@ input:focus {
 
 .webchat {
   min-height: 0;
+  background: #ffffff;
 }
 
 .loading {
   height: 100%;
   display: grid;
   place-items: center;
-  color: #b7bedd;
+  color: #5d6478;
 }
 
 .brand-page {
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr;
+  background: #ffffff;
 }
 
 .brand-lockup {
@@ -237,9 +243,7 @@ input:focus {
   width: 28px;
   height: 28px;
   border-radius: 9px;
-  background:
-    linear-gradient(135deg, #8b7cff 0%, #38bdf8 100%);
-  box-shadow: 0 8px 20px rgba(124, 106, 247, 0.35);
+  background: linear-gradient(135deg, #5b5fc7 0%, #38bdf8 100%);
 }
 
 .brand-mark-lg {
@@ -273,10 +277,10 @@ input:focus {
   align-items: flex-end;
   gap: 10px;
   padding: 12px 12px 12px 18px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(16, 21, 42, 0.92);
+  border: 1px solid #d9deea;
+  background: #ffffff;
   border-radius: 22px;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 12px 36px rgba(28, 39, 74, 0.08);
 }
 
 .brand-composer textarea {
@@ -286,9 +290,13 @@ input:focus {
   resize: none;
   border: 0;
   background: transparent;
-  color: #eef1ff;
+  color: #151826;
   outline: none;
   padding: 8px 0;
+}
+
+.brand-composer textarea::placeholder {
+  color: #8b90a5;
 }
 
 .arrow-button {
@@ -298,7 +306,7 @@ input:focus {
   border-radius: 14px;
   display: grid;
   place-items: center;
-  background: linear-gradient(180deg, #8b7cff, #6b5af0);
+  background: #5b5fc7;
   color: white;
   flex-shrink: 0;
 }
