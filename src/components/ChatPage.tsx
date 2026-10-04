@@ -9,6 +9,7 @@ import {
 import type { AccountInfo } from '@azure/msal-browser'
 import type { AppConfig } from '../config'
 import { createConnectionSettings } from '../copilotSettings'
+import { InitialMessageSender } from './InitialMessageSender'
 
 const { BasicWebChat, Composer } = Components
 
@@ -16,8 +17,10 @@ type ChatPageProps = {
   config: AppConfig
   token: string
   account: AccountInfo | null
+  initialMessage: string
   onLogout: () => void
   onChangeSettings: () => void
+  onNewChat: () => void
 }
 
 const styleOptions = {
@@ -42,8 +45,10 @@ export function ChatPage({
   config,
   token,
   account,
+  initialMessage,
   onLogout,
   onChangeSettings,
+  onNewChat,
 }: ChatPageProps) {
   const [connection, setConnection] = useState<CopilotStudioWebChatConnection | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -78,14 +83,17 @@ export function ChatPage({
   return (
     <div className="chat-app">
       <header className="chat-header">
-        <div>
-          <p className="eyebrow">Copilot Studio</p>
-          <strong>Agent chat</strong>
+        <div className="brand-lockup">
+          <span className="brand-mark" aria-hidden="true" />
+          <strong>Anthro</strong>
         </div>
         <div className="chat-actions">
           <span className="user-chip" title={account?.username}>
             {displayName}
           </span>
+          <button className="ghost" type="button" onClick={onNewChat}>
+            New chat
+          </button>
           <button className="ghost" type="button" onClick={onChangeSettings}>
             Settings
           </button>
@@ -101,6 +109,7 @@ export function ChatPage({
         {connection ? (
           <FluentThemeProvider>
             <Composer directLine={connection} styleOptions={styleOptions}>
+              <InitialMessageSender text={initialMessage} connection={connection} />
               <BasicWebChat />
             </Composer>
           </FluentThemeProvider>

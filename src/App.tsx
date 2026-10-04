@@ -1,11 +1,12 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import type { AccountInfo } from '@azure/msal-browser'
+import { BrandPage } from './components/BrandPage'
 import { SetupPage } from './components/SetupPage'
 import { loadConfig, type AppConfig } from './config'
 import { bootstrapAuth, logout } from './auth/msal'
 import { createConnectionSettings } from './copilotSettings'
 
-type Screen = 'setup' | 'connecting' | 'chat'
+type Screen = 'setup' | 'connecting' | 'home' | 'chat'
 
 const ChatPage = lazy(async () => {
   const module = await import('./components/ChatPage')
@@ -17,6 +18,7 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>(config ? 'connecting' : 'setup')
   const [token, setToken] = useState<string | null>(null)
   const [account, setAccount] = useState<AccountInfo | null>(null)
+  const [initialMessage, setInitialMessage] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [authAttempt, setAuthAttempt] = useState(0)
 
@@ -43,7 +45,7 @@ export default function App() {
         setToken(result.session.token)
         setAccount(result.session.account)
         setError(null)
-        setScreen('chat')
+        setScreen('home')
       })
       .catch((caught) => {
         if (cancelled) {
@@ -65,6 +67,7 @@ export default function App() {
     }
     setToken(null)
     setAccount(null)
+    setInitialMessage('')
     setScreen('connecting')
     try {
       await logout(config.appClientId, config.tenantId)
@@ -78,6 +81,7 @@ export default function App() {
   function handleChangeSettings() {
     setToken(null)
     setAccount(null)
+    setInitialMessage('')
     setError(null)
     setScreen('setup')
   }
@@ -86,6 +90,7 @@ export default function App() {
     setConfig(nextConfig)
     setToken(null)
     setAccount(null)
+    setInitialMessage('')
     setError(null)
     setScreen('connecting')
     setAuthAttempt((current) => current + 1)
@@ -97,8 +102,29 @@ export default function App() {
     setAuthAttempt((current) => current + 1)
   }
 
+  function handleStartChat(message: string) {
+    setInitialMessage(message)
+    setScreen('chat')
+  }
+
+  function handleNewChat() {
+    setInitialMessage('')
+    setScreen('home')
+  }
+
   if (screen === 'setup') {
     return <SetupPage onSaved={handleSaved} />
+  }
+
+  if (screen === 'home' && config && token) {
+    return (
+      <BrandPage
+        account={account}
+        onStart={handleStartChat}
+        onLogout={handleLogout}
+        onChangeSettings={handleChangeSettings}
+      />
+    )
   }
 
   if (screen === 'chat' && config && token) {
@@ -108,8 +134,10 @@ export default function App() {
           config={config}
           token={token}
           account={account}
+          initialMessage={initialMessage}
           onLogout={handleLogout}
           onChangeSettings={handleChangeSettings}
+          onNewChat={handleNewChat}
         />
       </Suspense>
     )
