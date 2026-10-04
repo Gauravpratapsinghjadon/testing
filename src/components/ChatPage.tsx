@@ -64,8 +64,7 @@ export function ChatPage({
       const client = new CopilotStudioClient(settings, token)
       created = CopilotStudioWebChat.createConnection(client, {
         showTyping: true,
-        // Skip the automatic greeting turn so the brand-page message starts the chat.
-        startConversation: !initialMessage.trim(),
+        startConversation: true,
       })
       if (active) {
         setConnection(created)

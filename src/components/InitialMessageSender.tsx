@@ -7,9 +7,19 @@ type InitialMessageSenderProps = {
 
 export function InitialMessageSender({ text }: InitialMessageSenderProps) {
   const sendMessage = hooks.useSendMessage()
-  const connectivity = hooks.useConnectivityStatus()
+  const [status] = hooks.useConnectivityStatus()
+  const [activities] = hooks.useActivities()
   const sentRef = useRef(false)
-  const status = Array.isArray(connectivity) ? connectivity[0] : connectivity
+
+  const botMessageCount = activities.filter((activity) => {
+    const role = 'from' in activity ? activity.from?.role : undefined
+    const textValue = 'text' in activity ? activity.text : undefined
+    return (
+      activity.type === 'message' &&
+      role !== 'user' &&
+      Boolean(typeof textValue === 'string' && textValue.trim())
+    )
+  }).length
 
   useEffect(() => {
     const message = text.trim()
@@ -17,9 +27,22 @@ export function InitialMessageSender({ text }: InitialMessageSenderProps) {
       return
     }
 
-    sentRef.current = true
-    sendMessage(message)
-  }, [sendMessage, status, text])
+    const sendOnce = () => {
+      if (sentRef.current) {
+        return
+      }
+      sentRef.current = true
+      sendMessage(message)
+    }
+
+    if (botMessageCount > 0) {
+      const timer = window.setTimeout(sendOnce, 600)
+      return () => window.clearTimeout(timer)
+    }
+
+    const fallback = window.setTimeout(sendOnce, 8000)
+    return () => window.clearTimeout(fallback)
+  }, [botMessageCount, sendMessage, status, text])
 
   return null
 }
