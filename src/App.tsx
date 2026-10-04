@@ -1,12 +1,11 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import type { AccountInfo } from '@azure/msal-browser'
-import { LoginPage } from './components/LoginPage'
 import { SetupPage } from './components/SetupPage'
 import { loadConfig, type AppConfig } from './config'
-import { loginWithPopup, logout, trySilentLogin } from './auth/msal'
+import { bootstrapAuth, logout } from './auth/msal'
 import { createConnectionSettings } from './copilotSettings'
 
-type Screen = 'setup' | 'login' | 'chat'
+type Screen = 'setup' | 'connecting' | 'chat'
 
 const ChatPage = lazy(async () => {
   const module = await import('./components/ChatPage')
@@ -15,11 +14,11 @@ const ChatPage = lazy(async () => {
 
 export default function App() {
   const [config, setConfig] = useState<AppConfig | null>(() => loadConfig())
-  const [screen, setScreen] = useState<Screen>(config ? 'login' : 'setup')
+  const [screen, setScreen] = useState<Screen>(config ? 'connecting' : 'setup')
   const [token, setToken] = useState<string | null>(null)
   const [account, setAccount] = useState<AccountInfo | null>(null)
-  const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [authAttempt, setAuthAttempt] = useState(0)
 
   const settings = useMemo(
     () => (config ? createConnectionSettings(config) : null),
@@ -27,67 +26,53 @@ export default function App() {
   )
 
   useEffect(() => {
-    if (!settings || screen !== 'login' || token) {
+    if (!settings || screen !== 'connecting') {
       return
     }
 
     let cancelled = false
-    setBusy(true)
-    trySilentLogin(settings)
-      .then((session) => {
-        if (cancelled || !session) {
+
+    bootstrapAuth(settings)
+      .then((result) => {
+        if (cancelled) {
           return
         }
-        setToken(session.token)
-        setAccount(session.account)
+        if (result.status === 'redirecting') {
+          return
+        }
+        setToken(result.session.token)
+        setAccount(result.session.account)
+        setError(null)
         setScreen('chat')
       })
-      .catch(() => {
-        // Stay on the login screen and wait for a popup sign-in.
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setBusy(false)
+      .catch((caught) => {
+        if (cancelled) {
+          return
         }
+        setError(
+          caught instanceof Error ? caught.message : 'Microsoft login failed.',
+        )
       })
 
     return () => {
       cancelled = true
     }
-  }, [settings, screen, token])
-
-  async function handleLogin() {
-    if (!settings) {
-      return
-    }
-    setBusy(true)
-    setError(null)
-    try {
-      const session = await loginWithPopup(settings)
-      setToken(session.token)
-      setAccount(session.account)
-      setScreen('chat')
-    } catch (caught) {
-      const message =
-        caught instanceof Error ? caught.message : 'Microsoft login failed.'
-      setError(message)
-    } finally {
-      setBusy(false)
-    }
-  }
+  }, [settings, screen, authAttempt])
 
   async function handleLogout() {
     if (!config) {
       return
     }
-    try {
-      await logout(config.appClientId, config.tenantId)
-    } catch {
-      // Local app state still resets if the popup is closed.
-    }
     setToken(null)
     setAccount(null)
-    setScreen('login')
+    setScreen('connecting')
+    try {
+      await logout(config.appClientId, config.tenantId)
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : 'Microsoft logout failed.',
+      )
+    }
   }
 
   function handleChangeSettings() {
@@ -102,7 +87,14 @@ export default function App() {
     setToken(null)
     setAccount(null)
     setError(null)
-    setScreen('login')
+    setScreen('connecting')
+    setAuthAttempt((current) => current + 1)
+  }
+
+  function retryLogin() {
+    setError(null)
+    setScreen('connecting')
+    setAuthAttempt((current) => current + 1)
   }
 
   if (screen === 'setup') {
@@ -124,12 +116,24 @@ export default function App() {
   }
 
   return (
-    <LoginPage
-      userName={account?.username}
-      busy={busy}
-      error={error}
-      onLogin={handleLogin}
-      onChangeSettings={handleChangeSettings}
-    />
+    <div className="page">
+      <div className="card">
+        <p className="eyebrow">Microsoft sign-in</p>
+        <h1>{error ? 'Could not sign in' : 'Signing you in'}</h1>
+        <p className="lede">
+          {error
+            ? 'The app will send you to Microsoft login again.'
+            : 'If this tenant already has a session, chat will open automatically. Otherwise you will be redirected to Microsoft login.'}
+        </p>
+        {error ? <div className="banner error">{error}</div> : null}
+        {error ? (
+          <button className="primary" type="button" onClick={retryLogin}>
+            Continue to Microsoft login
+          </button>
+        ) : (
+          <p className="hint">Redirecting…</p>
+        )}
+      </div>
+    </div>
   )
 }
