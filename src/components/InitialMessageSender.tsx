@@ -1,31 +1,23 @@
 import { useEffect, useRef } from 'react'
 import { hooks } from 'botframework-webchat'
+import type { CopilotStudioWebChatConnection } from '@microsoft/agents-copilotstudio-client'
 
 type InitialMessageSenderProps = {
   text: string
+  connection: CopilotStudioWebChatConnection
 }
 
-export function InitialMessageSender({ text }: InitialMessageSenderProps) {
+export function InitialMessageSender({ text, connection }: InitialMessageSenderProps) {
   const sendMessage = hooks.useSendMessage()
-  const [status] = hooks.useConnectivityStatus()
-  const [activities] = hooks.useActivities()
   const sentRef = useRef(false)
-
-  const botMessageCount = activities.filter((activity) => {
-    const role = 'from' in activity ? activity.from?.role : undefined
-    const textValue = 'text' in activity ? activity.text : undefined
-    return (
-      activity.type === 'message' &&
-      role !== 'user' &&
-      Boolean(typeof textValue === 'string' && textValue.trim())
-    )
-  }).length
 
   useEffect(() => {
     const message = text.trim()
-    if (!message || sentRef.current || status !== 'connected') {
+    if (!message) {
       return
     }
+
+    let timer = 0
 
     const sendOnce = () => {
       if (sentRef.current) {
@@ -35,14 +27,26 @@ export function InitialMessageSender({ text }: InitialMessageSenderProps) {
       sendMessage(message)
     }
 
-    if (botMessageCount > 0) {
-      const timer = window.setTimeout(sendOnce, 600)
-      return () => window.clearTimeout(timer)
+    const scheduleSend = () => {
+      window.clearTimeout(timer)
+      timer = window.setTimeout(sendOnce, 800)
     }
 
-    const fallback = window.setTimeout(sendOnce, 8000)
-    return () => window.clearTimeout(fallback)
-  }, [botMessageCount, sendMessage, status, text])
+    if (connection.connectionStatus$.value === 2) {
+      scheduleSend()
+    }
+
+    const subscription = connection.connectionStatus$.subscribe((status) => {
+      if (status === 2) {
+        scheduleSend()
+      }
+    })
+
+    return () => {
+      window.clearTimeout(timer)
+      subscription.unsubscribe()
+    }
+  }, [connection, sendMessage, text])
 
   return null
 }

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Components } from 'botframework-webchat'
+import { FluentThemeProvider } from 'botframework-webchat-fluent-theme'
 import {
   CopilotStudioClient,
   CopilotStudioWebChat,
@@ -38,7 +39,6 @@ const styleOptions = {
   sendBoxBorderTop: '1px solid #e6e9f2',
   suggestedActionBackgroundColor: '#f3f5fa',
   suggestedActionTextColor: '#1b1f2a',
-  transcriptBackgroundColor: '#ffffff',
 }
 
 export function ChatPage({
@@ -62,10 +62,7 @@ export function ChatPage({
 
     try {
       const client = new CopilotStudioClient(settings, token)
-      created = CopilotStudioWebChat.createConnection(client, {
-        showTyping: true,
-        startConversation: true,
-      })
+      created = CopilotStudioWebChat.createConnection(client, { showTyping: true })
       if (active) {
         setConnection(created)
       }
@@ -81,7 +78,7 @@ export function ChatPage({
         created.end()
       }
     }
-  }, [initialMessage, settings, token])
+  }, [settings, token])
 
   return (
     <div className="chat-app">
@@ -110,10 +107,12 @@ export function ChatPage({
 
       <div className="webchat">
         {connection ? (
-          <Composer directLine={connection} styleOptions={styleOptions}>
-            {initialMessage.trim() ? <InitialMessageSender text={initialMessage} /> : null}
-            <BasicWebChat />
-          </Composer>
+          <FluentThemeProvider>
+            <Composer directLine={connection} styleOptions={styleOptions}>
+              <InitialMessageSender text={initialMessage} connection={connection} />
+              <BasicWebChat />
+            </Composer>
+          </FluentThemeProvider>
         ) : (
           <div className="loading">Opening bot…</div>
         )}
